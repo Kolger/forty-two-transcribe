@@ -1,6 +1,0 @@
-python-dotenv==1.0.1
-python-telegram-bot==21.3
-aiohttp==3.9.5
-moviepy==1.0.3
-pydantic==2.10.1
-pydantic-settings==2.6.1

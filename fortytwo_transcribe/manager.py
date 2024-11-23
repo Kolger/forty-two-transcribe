@@ -3,7 +3,7 @@ import io
 import tempfile
 
 import telegram
-from moviepy.editor import VideoFileClip
+from moviepy import VideoFileClip
 
 from fortytwo_transcribe.openai import OpenAIProvider
 from fortytwo_transcribe.types import AIResponse
@@ -21,7 +21,7 @@ class Manager:
                     audio = video.audio
                     audio_buffer = io.BytesIO()
                     with tempfile.NamedTemporaryFile(delete=True, suffix=".mp3") as audio_file:
-                        audio.write_audiofile(audio_file.name, codec='mp3', verbose=False, logger=None)
+                        audio.write_audiofile(audio_file.name, codec='mp3', logger=None)
                         audio_buffer.write(audio_file.read())
                     audio_buffer.seek(0)
                     return audio_buffer
@@ -29,7 +29,6 @@ class Manager:
         return await loop.run_in_executor(None, process_video)
 
     async def transcribe_video(self, video_file: telegram.File) -> AIResponse:
-        print("transcribe_video start")
         bytes_buffer = io.BytesIO()
         await video_file.download_to_memory(out=bytes_buffer)
         bytes_buffer.seek(0)

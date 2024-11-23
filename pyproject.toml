@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "fortytwo-transcribe"
+version = "0.1.0"
+description = "A Telegram bot that transcribes videos and audio messages to text via OpenAI Whisper API"
+authors = ["Nikita Smirnov <kolger.ru@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+python-telegram-bot = "^21.7"
+aiohttp = "^3.11.7"
+moviepy = "^2.0.0"
+pydantic = "^2.10.1"
+pydantic-settings = "^2.6.1"
+python-magic = "^0.4.27"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
