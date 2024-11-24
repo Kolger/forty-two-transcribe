@@ -6,3 +6,4 @@ class Settings(BaseSettings):
 
     openai_api_key: str
     telegram_token: str
+    allowed_users: list[int | str] | None = None

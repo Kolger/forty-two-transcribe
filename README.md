@@ -28,10 +28,11 @@ poetry run python main.py
 
 ## Settings
 
-| Variable           | Description        | Default Value |
-| ------------------ | ------------------ | ------------- |
-| OPENAI_API_KEY     | OpenAI API key     | -             |
-| TELEGRAM_API_TOKEN | Telegram API token | -             |
+| Variable           | Description                                                                                        | Default Value |
+| ------------------ | -------------------------------------------------------------------------------------------------- | ------------- |
+| OPENAI_API_KEY     | OpenAI API key                                                                                     | -             |
+| TELEGRAM_API_TOKEN | Telegram API token                                                                                 | -             |
+| ALLOWED_USERS      | List of allowed users (username or user id). Should be a Python list. Example: [1234567890, durov] | -             |
 
 ## Obtaining API keys
 
