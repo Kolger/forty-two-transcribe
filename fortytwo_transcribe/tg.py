@@ -1,14 +1,15 @@
 import asyncio
 import io
+from typing import Coroutine
 
 from telegram import Update, constants
-
 from telegram.ext import Application, ContextTypes, MessageHandler, filters
 
+from fortytwo_transcribe.logger import logger
 from fortytwo_transcribe.manager import Manager
 from fortytwo_transcribe.settings import Settings
-from typing import Coroutine
 from fortytwo_transcribe.types import AIResponse
+
 
 class TelegramBot:
     def __init__(self, token: str = None):
@@ -23,16 +24,20 @@ class TelegramBot:
         self.application.add_handler(MessageHandler(filters.AUDIO, self.handle_audio))
         self.application.add_handler(MessageHandler(filters.VOICE, self.handle_voice))
         self.application.add_handler(MessageHandler(~filters.TEXT & ~filters.VIDEO_NOTE & ~filters.VIDEO & ~filters.AUDIO & ~filters.VOICE, self.handle_other))
+        logger.info("Telegram bot initialized")
 
     async def handle_other(self, tg_update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        logger.info(f"Received unsupported message from {tg_update.message.chat.username} ({tg_update.message.chat.id}): {tg_update.message.text}")
         await self.__send_message(tg_update, "Sorry, I cannot process this message")
 
     async def handle_text(self, tg_update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         text = tg_update.message.text
+        logger.info(f"Received text message from {tg_update.message.chat.username} ({tg_update.message.chat.id}): {text}")
         await self.__send_message(tg_update, f"Sorry, I cannot process this message:\n{text}")
 
     async def handle_voice(self, tg_update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         audio_file = await tg_update.message.voice.get_file()
+        logger.info(f"Received voice message from {tg_update.message.chat.username} ({tg_update.message.chat.id})")
         message = await self.__execute_with_typing(self.manager.transcribe_audio(audio_file), tg_update)
 
         if message:
@@ -40,6 +45,7 @@ class TelegramBot:
 
     async def handle_audio(self, tg_update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         audio_file = await tg_update.message.audio.get_file()
+        logger.info(f"Received audio message from {tg_update.message.chat.username} ({tg_update.message.chat.id})")
         message = await self.__execute_with_typing(self.manager.transcribe_audio(audio_file), tg_update)
 
         if message:
@@ -47,6 +53,7 @@ class TelegramBot:
 
     async def handle_video_note(self, tg_update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         video_file = await tg_update.message.video_note.get_file()
+        logger.info(f"Received video note message from {tg_update.message.chat.username} ({tg_update.message.chat.id})")
         message = await self.__execute_with_typing(self.manager.transcribe_video(video_file), tg_update)
 
         if message:
@@ -54,12 +61,14 @@ class TelegramBot:
 
     async def handle_video(self, tg_update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         video_file = await tg_update.message.video.get_file()
+        logger.info(f"Received video message from {tg_update.message.chat.username} ({tg_update.message.chat.id})")
         message = await self.__execute_with_typing(self.manager.transcribe_video(video_file), tg_update)
 
         if message:
             await self.__send_message(tg_update, message.content)
 
     async def __send_message(self, tg_update: Update, message: str):
+        logger.info(f"Sending message to {tg_update.message.chat.username} ({tg_update.message.chat.id}): {message}")
         if len(message) < constants.MessageLimit.MAX_TEXT_LENGTH:
             await tg_update.message.reply_text(message, reply_to_message_id=tg_update.message.message_id)
         else:
@@ -86,6 +95,7 @@ class TelegramBot:
         except asyncio.TimeoutError:
             typing_task.cancel()
             await self.application.bot.send_message(tg_update.message.chat.id, "The operation took too long and was canceled.")
+            logger.info(f"Operation took too long and was canceled for {tg_update.message.chat.username} ({tg_update.message.chat.id})")
             return False
 
     def run(self) -> None:

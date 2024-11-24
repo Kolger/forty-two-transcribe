@@ -5,6 +5,7 @@ import tempfile
 import telegram
 from moviepy import VideoFileClip
 
+from fortytwo_transcribe.logger import logger
 from fortytwo_transcribe.openai import OpenAIProvider
 from fortytwo_transcribe.types import AIResponse
 
@@ -44,5 +45,8 @@ class Manager:
 
     async def __transcribe_bytes(self, audio_bytes: io.BytesIO) -> AIResponse:
         openai_provider = OpenAIProvider()
-        
-        return await openai_provider.transcribe(audio_bytes)
+        try:
+            return await openai_provider.transcribe(audio_bytes)
+        except Exception as e:
+            logger.error(f"Error transcribing audio: {e}, exception type: {e.__class__.__name__}")
+            return AIResponse(content=f"Error while transcribing audio: {str(e)}", provider="OPENAI", error=True)
